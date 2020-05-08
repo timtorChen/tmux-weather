@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-showWeather() {
+pluginFolder="$(realpath ~/.tmux/plugins/tmux-weather)"
+cacheFile="$pluginFolder/cache"
+
+getWeather() {
     city=$(curl -s "https://ipinfo.io?token=$IPINFO_TOKEN" | jq -r ".city")
     weatherJSON=$(curl -s "https://api.openweathermap.org/data/2.5/weather?units=metric&q=$city&appid=$OWM_TOKEN")
     weatherCode=$(printf "$weatherJSON" | jq -r ".weather | .[0] | .id")
@@ -117,7 +120,26 @@ showWeather() {
 }
 
 if [ "$IPINFO_TOKEN" ] && [ "$OWM_TOKEN" ]; then
-    showWeather
+    exptime="900" # 900 second, 15 minutes
+    now=$(date -u +%s)
+
+    # if there is such file, and if cache is expired, make a request and update the cache
+    if [ -f "$cacheFile" ]; then
+        lastmod=$(date -r $cacheFile +%s)
+        delta=$(($now - $lastmod))
+        if [ $delta -gt $exptime ]; then
+            weather=$(getWeather)
+            echo "$weather" >"$cacheFile"
+        fi
+    # if there is no such file, make a request and create the cache
+    else
+        weather=$(getWeather)
+        echo "$weather" >"$cacheFile"
+    fi
+
+    # simply show the weather in cache
+    cat "$cacheFile"
+
 else
     printf "🎃 lack-of-token"
 fi
