@@ -11,6 +11,7 @@ getWeather() {
     sunrise=$(printf "$weatherJSON" | jq -r ".sys.sunrise")
     sunset=$(printf "$weatherJSON" | jq -r ".sys.sunset")
     now=$(date -u +%s)
+    echo $now
 
     # openWeatherMap weather code: https://openweathermap.org/weather-conditions
     awkScript='
@@ -29,7 +30,7 @@ getWeather() {
             else if ( currentIntPhase==25 )
                 return "🌓"     # first quator 
 
-            else if ( currentIntPhase>25 currentIntPhase<50 )
+            else if ( currentIntPhase>25 && currentIntPhase<50 )
                 return "🌔"     # waxing gibbous     
 
             else if ( currentIntPhase==50 )
@@ -45,67 +46,61 @@ getWeather() {
                 return "🌘"     # waning moon
         }
 
-        BEGIN{
+        function getWeatherEmoji() {
             if (code >= 210 && code <=221)
             # thunderstorm
-                emoji="🌩"        
+                return "🌩"        
             
             else if ( (code >= 200 && code <= 202) \
               || (code >= 230 && code <= 232))
             # thunderstorm with rain
-                emoji="⛈"        
+                return "⛈"        
             
             else if (code >= 300 && code <= 321)
             # drizzle 
-                emoji="🌧"
+                return "🌧"
             
             else if (code >= 500 && code <= 531)
             # rain
-                emoji="🌧"
+                return "🌧"
             
             else if (code >= 600 && code<=622)
             # snow
-                emoji="❄️"
+                return "❄️"
 
             else if (code == 701 || code == 711 || code == 721 || code == 741)
             # mist, smoke, fog, haze ...
-                emoji="🌫"
+                return "🌫"
 
             else if (code == 781)
             # typhoon
-                emoji="🌀"
+                return "🌀"
 
-            else if (code == 800){
+            else if (code == 800)
             # clear sky
-                if (now >= sunrise && now < sunset)
-                    emoji="☀"
-                else if (now >= sunset)
-                    emoji=getMoonEmoji()
-            }
+                return "☀"
             
-            else if (code == 801){
+            else if (code == 801)
             # clouds: 11%-25%
-                if (now >= sunrise && now < sunset)
-                    emoji="🌤"
-                else
-                    emoji=getMoonEmoji()
-            }
+                return "🌤"
 
-            else if (code == 802 || code == 803){  
+            else if (code == 802 || code == 803)
             # clouds: 25%-50% 
             # clouds: 51%-84%
-                if (now >= sunrise && now < sunset)
-                    emoji="🌥"
-                else
-                    emoji=getMoonEmoji()
-            }
+                return "🌥"
             
-            else if ( code == 804){
+            else if ( code == 804)
             # clouds: 85%-100%
-                emoji="☁"
-            }
+                return "☁"
 
-            print emoji 
+        }
+
+        BEGIN {
+            emoji=getWeatherEmoji()
+            if ( emoji == "☀" || emoji == "🌤" || emoji == "🌥" )
+                emoji=getMoonEmoji()
+
+            print emoji
         }
     '
     emoji=$(awk -v code="$weatherCode" \
