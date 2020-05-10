@@ -1,10 +1,40 @@
 #!/usr/bin/env bash
 
-getWeather() {
-    ipInfoJSON=$(curl -s "https://ipinfo.io?token=$IPINFO_TOKEN")
-    city=$(printf "$ipInfoJSON" | jq -r ".city")
+get_tmux_option() {
+  local option_name="$1"
+  local default_value="$2"
+  local option_value=$(tmux show-option -gqv $option_name)
 
-    weatherJSON=$(curl -s "https://api.openweathermap.org/data/2.5/weather?units=metric&q=$city&appid=$OWM_TOKEN")
+  if [ -z "$option_value" ]; then
+    printf "$default_value"
+  else
+    printf "$option_value"
+  fi
+}
+
+set_tmux_option() {
+  local option_name="$1"
+  local option_value="$2"
+  $(tmux set-option -gq "$option_name" "$option_value")
+}
+
+getWeather() {
+    city="$1"
+    units="$2"
+
+    if [ -z "$1" ]; then
+        ipInfoJSON=$(curl -s "https://ipinfo.io?token=$IPINFO_TOKEN")
+        city=$(printf "$ipInfoJSON" | jq -r ".city")
+    fi
+
+    if [ "$units" == "f" ]; then
+        unitsName="imperial"
+    else 
+        unitsName="metric"
+    fi
+
+    weatherJSON=$(curl -s "https://api.openweathermap.org/data/2.5/weather?units=$unitsName&q=$city&appid=$OWM_TOKEN")
+
     weatherCode=$(printf "$weatherJSON" | jq -r ".weather | .[0] | .id")
     temperature=$(printf "$weatherJSON" | jq -r ".main.temp")
     sunrise=$(printf "$weatherJSON" | jq -r ".sys.sunrise")

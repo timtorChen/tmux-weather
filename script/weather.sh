@@ -4,33 +4,38 @@ base="$(dirname $(realpath $0))"
 # import helper functions
 . "$base/helper.sh"
 
-pluginFolder="$(realpath ~/.tmux/plugins/tmux-weather)"
-cacheFile="$pluginFolder/cache"
+# customizabale options
+intervalOption="@tmux-weather-interval"
+locationOption="@tmux-weather-location"
+unitsOption="@tmux-weather-units"
+
+# inner options
+weatherValueOption="@tmux-weather-value"
+prevUpdateOption="@tmux-weather-prev-update"
 
 # if ipinfo token or openweathermap token is not set
 if [ "$IPINFO_TOKEN" == "" ] || [ "$OWM_TOKEN" == "" ]; then
     printf "🎃 lack-of-token"
 # if there is no internet connection
-elif $( ! nc -dzw1 8.8.8.8 443); then
+elif $(! nc -dzw1 8.8.8.8 443); then
     printf "🌊 no-internet"
 else
-    exptime="900" # 900 second, 15 minutes
+    # get previous update time, the default value is 0
+    prevUpdate=$(get_tmux_option $prevUpdateOption 0)
     now=$(date -u +%s)
+    delta=$(($now - $prevUpdate))
 
-    #  if there is such file, and if cache is expired, make a request and update the cache
-    if [ -f "$cacheFile" ]; then
-        lastmod=$(date -r $cacheFile +%s)
-        delta=$(($now - $lastmod))
-        if [ $delta -gt $exptime ]; then
-            weather=$(getWeather)
-            echo "$weather" >"$cacheFile"
-        fi
-    # if there is no such file, make a request and create the cache
-    else
-        weather=$(getWeather)
-        echo "$weather" >"$cacheFile"
+    # get update interval, the default value is 15
+    interval=$(get_tmux_option $intervalOption 15)
+    expiration=$(($interval * 60))
+
+    if [ $delta -ge $expiration ]; then
+        units=$(get_tmux_option "$unitsOption")
+        location=$(get_tmux_option "$locationOption")
+        weather=$(getWeather $location $units)
+        set_tmux_option "$weatherValueOption" "$weather"
+        set_tmux_option "$prevUpdateOption" "$now"
     fi
 
-    # simply show the weather in cache
-    cat "$cacheFile"
+    printf "$(get_tmux_option "$weatherValueOption")"
 fi

@@ -7,9 +7,9 @@ weatherScript="$base/script/weather.sh"
 
 replace_tmux_option() {
     local option="$1"
-    local value="$(tmux show -gqv $option)"
+    local value="$(get_tmux_optionn $option)"
     local replacedValue="${value/$weatherTag/"#($weatherScript)"}"
-    tmux set -gq "$option" "$replacedValue"
+    set_tmux_option "$option" "$replacedValue"
 }
 
 main() {
