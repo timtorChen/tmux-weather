@@ -3,12 +3,12 @@
 get_tmux_option() {
   local option_name="$1"
   local default_value="$2"
-  local option_value=$(tmux show-option -gqv $option_name)
+  local option_value="$(tmux show-option -gqv $option_name)"
 
   if [ -z "$option_value" ]; then
-    printf "$default_value"
+    echo -n "$default_value"
   else
-    printf "$option_value"
+    echo -n "$option_value"
   fi
 }
 
