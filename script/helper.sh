@@ -18,6 +18,11 @@ set_tmux_option() {
   $(tmux set-option -gq "$option_name" "$option_value")
 }
 
+InternetConnected() {
+    curl -fsI https://ipinfo.io &>/dev/null &&
+    curl -fsI https://api.openweathermap.org &>/dev/null 
+}
+
 getWeather() {
     city="$1"
     units="$2"

@@ -15,11 +15,13 @@ prevUpdateOption="@tmux-weather-prev-update"
 
 if [ "$IPINFO_TOKEN" == "" ] || [ "$OWM_TOKEN" == "" ]; then
     printf "🎃 lack-of-token"
-# if there is no internet connection
-elif $(! nc -dzw1 8.8.8.8 443); then
-    printf "🌊 no-internet"
-
 else
+    # if there is no internet connection
+    if $(! InternetConnected); then
+        printf "🌊 no-internet"
+        exit 0
+    fi
+
     location=$(get_tmux_option "$locationOption")
     units=$(get_tmux_option "$unitsOption")
     weather=$(getWeather "$location" "$units")
