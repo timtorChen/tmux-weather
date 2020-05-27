@@ -8,7 +8,7 @@ Motivation: [郭采潔 - 又圓了的月亮](https://www.youtube.com/watch?v=OfZ
 
 ## Install with [tmux plugin manager - tpm](https://github.com/tmux-plugins/tpm)
 
-0. The plugin script use `curl` , `nc`, `jq`, `awk`, and [tpm](https://github.com/tmux-plugins/tpm) make sure you have these tools.
+0. The plugin script use `curl`, `jq`, `awk`, and [tpm](https://github.com/tmux-plugins/tpm) make sure you have these tools.
 
 1. Add the following line to `~/.tmux.conf`.
 
@@ -44,14 +44,14 @@ There are few customization options: update interval, location and temperature u
 
 ```bash
 # update interval is 15 minutes by default
-set-option -g @tmux-weather-interval 15       
+set-option -g @tmux-weather-interval 15
 
 # use ip to get location by default
-set-option -g @tmux-weather-location "Taipei" 
+set-option -g @tmux-weather-location "Taipei"
 
-# set "c" for Celsius, and "f" for Fahrenheit. 
+# set "c" for Celsius, and "f" for Fahrenheit.
 # default units is "c"
-set-option -g @tmux-weather-units "c"         
+set-option -g @tmux-weather-units "c"
 ```
 
 ## References

@@ -19,8 +19,8 @@ set_tmux_option() {
 }
 
 InternetConnected() {
-    curl -fsI https://ipinfo.io &>/dev/null &&
-    curl -fsI https://api.openweathermap.org &>/dev/null 
+    curl -fsIL https://ipinfo.io &>/dev/null &&
+    curl -fsIL https://openweathermap.org &>/dev/null 
 }
 
 getWeather() {
