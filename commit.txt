@@ -1,0 +1,3 @@
+Change connectivity check 
+- change connectivity check into 1.1.1.1 in prevent of DNS sink, like pihole
+- add services specified error

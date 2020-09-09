@@ -19,16 +19,22 @@ set_tmux_option() {
 }
 
 InternetConnected() {
-    curl -fsIL https://ipinfo.io &>/dev/null &&
-    curl -fsIL https://openweathermap.org &>/dev/null 
+    ping -c 1 1.1.1.1 > /dev/null
 }
 
 getWeather() {
     city="$1"
     units="$2"
 
-    if [ -z "$1" ]; then
+    if [ -z "$city" ]; then
         ipInfoJSON=$(curl -s "https://ipinfo.io?token=$IPINFO_TOKEN")
+        rc="$?"
+
+        if [ "$rc" -ne 0 ]; then
+            printf "🌊 ipinfo-error"
+            return 0
+        fi
+
         city=$(printf "$ipInfoJSON" | jq -r ".city")
     fi
 
@@ -39,6 +45,14 @@ getWeather() {
     fi
 
     weatherJSON=$(curl -s "https://api.openweathermap.org/data/2.5/weather?units=$unitsName&q=$city&appid=$OWM_TOKEN")
+    rc="$?"
+
+    if [ $rc -ne 0 ]; then
+        printf "🌊 weather-error"
+        return 0
+    fi
+
+
 
     weatherCode=$(printf "$weatherJSON" | jq -r ".weather | .[0] | .id")
     temperature=$(printf "$weatherJSON" | jq -r ".main.temp")
